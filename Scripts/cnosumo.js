@@ -26,23 +26,56 @@ function exportarAPDF(datos) {
 
         return [
             a.nombre,
-            `${a.vatios}W`,
+            a.vatios * a.cantidad, // Potencia total por tipo de aparato
             a.factorPotencia.toFixed(2),
             a.cantidad,
             a.voltaje + 'V',
             a.horasDiarias.toFixed(1),
-            consumoDiarioTotal.toFixed(2),
-            consumoMensualTotal.toFixed(2)
+            consumoDiarioTotal,
+            consumoMensualTotal
         ];
     });
 
+    // Calcular totales
+    const totalPotencia = aparatosData.reduce((sum, a) => sum + a[1], 0);
+    const totalConsumoDiario = aparatosData.reduce((sum, a) => sum + a[6], 0);
+    const totalConsumoMensual = aparatosData.reduce((sum, a) => sum + a[7], 0);
+
+    // Formatear datos para la tabla
+    const bodyData = aparatosData.map(a => [
+        a[0],
+        `${a[1]}W`,
+        a[2],
+        a[3],
+        a[4],
+        a[5],
+        a[6].toFixed(2),
+        a[7].toFixed(2)
+    ]);
+
+    const footerData = [
+        ['TOTAL',
+         `${totalPotencia}W`,
+         '',
+         '',
+         '',
+         '',
+         totalConsumoDiario.toFixed(2),
+         totalConsumoMensual.toFixed(2)
+        ]
+    ];
+
     doc.autoTable({
         head: [['Dispositivo', 'Potencia', 'FP', 'Cant.', 'Voltaje', 'H/D', 'Cons. Diario Total\n(kWh)', 'Cons. Mens. Total\n(kWh)']],
-        body: aparatosData,
+        body: bodyData,
+        foot: footerData,
         startY: 35,
         margin: { top: 35 },
         headStyles: { halign: 'center', valign: 'middle' },
+        footStyles: { halign: 'center', fontStyle: 'bold' },
         columnStyles: {
+            0: { fontStyle: 'bold' }, // 'TOTAL' en negrita
+            1: { halign: 'center' }, // Potencia
             2: { halign: 'center' }, // FP
             3: { halign: 'center' }, // Cant.
             4: { halign: 'center' }, // Voltaje
