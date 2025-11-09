@@ -87,28 +87,9 @@ function exportarAPDF(datos) {
 
     // Parámetros técnicos
     const finalY = doc.lastAutoTable.finalY || 35;
-    doc.setFontSize(14);
-    doc.text('Parámetros Técnicos:', 14, finalY + 15);
 
-    const params = [
-        ['CTC:', datos.ctc.toFixed(2) + ' kVA'],
-        ['DAC:', datos.dac.toFixed(2) + ' kW'],
-        ['Consumo Mensual:', datos.consumoMensual.toFixed(2) + ' kWh'],
-        ['Consumo Diario:', datos.consumoDiario.toFixed(2) + ' kWh']
-    ];
 
-    doc.autoTable({
-        body: params,
-        startY: finalY + 20,
-        theme: 'plain',
-        styles: {
-            cellPadding: 2,
-            fontSize: 12
-        },
-        columnStyles: {
-            0: { fontStyle: 'bold' }
-        }
-    });
+
 
     // Generar y abrir el PDF en una nueva pestaña
     doc.output('dataurlnewwindow');
@@ -116,12 +97,6 @@ function exportarAPDF(datos) {
 
 // Configuración inicial de eventos
 document.addEventListener('DOMContentLoaded', function() {
-    // El input de cargar archivo ahora está en la sección de configuración
-    const cargarArchivoConfigInput = document.getElementById('cargar-archivo-config');
-    if (cargarArchivoConfigInput) {
-        cargarArchivoConfigInput.addEventListener('change', manejarArchivo);
-    }
-    
     // Evento para exportar a PDF
     $(document).on('click', '#exportar-pdf', function() {
         if (aparatosSeleccionados.length === 0) {
@@ -151,43 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('boton-limpiar').addEventListener('click', limpiarTodo);
     // El evento 'change' en 'dias-mes' ya no es necesario aquí, se gestiona desde la configuración
     document.getElementById('boton-calcular').addEventListener('click', calcularConsumo);
-
-    // Verificar si hay un archivo almacenado en localStorage al cargar la página
-    const archivoGuardado = localStorage.getItem('archivoExcel');
-    if (archivoGuardado) {
-        const datos = new Uint8Array(JSON.parse(archivoGuardado));
-        procesarArchivo(datos);
-    }
 });
-
-// Función para procesar archivo Excel
-function manejarArchivo(evento) {
-    const archivo = evento.target.files[0];
-    const lector = new FileReader();
-
-    lector.onload = function(e) {
-        // Convertir archivo a datos procesables
-        const datos = new Uint8Array(e.target.result);
-
-        // Guardar el archivo en localStorage
-        localStorage.setItem('archivoExcel', JSON.stringify(Array.from(datos)));
-
-        // Procesar el archivo
-        procesarArchivo(datos);
-
-        // Notificar al usuario que el archivo ha sido actualizado
-        // Reemplazando alert con un mensaje en la UI si es posible, o simplemente un console.log
-        const mensajeConfiguracion = document.getElementById('mensaje-configuracion');
-        if (mensajeConfiguracion) {
-            mensajeConfiguracion.textContent = 'Archivo de dispositivos cargado y almacenado.';
-            mensajeConfiguracion.style.color = 'green';
-            setTimeout(() => mensajeConfiguracion.textContent = '', 3000);
-        } else {
-            console.log('El archivo ha sido actualizado y almacenado en la memoria.');
-        }
-    };
-    lector.readAsArrayBuffer(archivo);
-}
 
 // Función para procesar el archivo Excel
 function procesarArchivo(datos) {
@@ -210,6 +149,25 @@ function procesarArchivo(datos) {
 
     configurarAutocompletado();
 }
+
+// Función para refrescar el autocompletado desde el módulo de artefactos
+window.refreshAutocompleteFromArtifacts = function(artifactsData) {
+    // Mapear datos del catálogo al formato de `aparatos`
+    aparatos = artifactsData.map(a => ({
+        nombre: a.value,
+        vatios: a.watt,
+        factorPotencia: a.fp,
+        horasDiarias: a.hd,
+        fase: a.fase,
+        voltaje: a.voltaje
+    }));
+
+    // Actualizar el índice para búsqueda eficiente
+    aparatosMap = new Map(aparatos.map(a => [a.nombre, a]));
+
+    // Reconfigurar el autocompletado con la nueva fuente de datos
+    configurarAutocompletado();
+};
 
 // Configurar autocompletado de dispositivos
 function configurarAutocompletado() {
@@ -401,28 +359,7 @@ function calcularConsumo() {
                 </div>
             </div>
 
-            <!-- Caja 2 - Parámetros Técnicos -->
-            <div class="caja-resultado">
-                <h4 class="titulo-caja">Parámetros Técnicos</h4>
-                <div class="consumo-detalle">
-                    <p class="item-resultado">
-                        <span class="etiqueta">CTC:</span>
-                        <span class="valor-destacado">${ctc.toFixed()} kVA</span>
-                    </p>
-                    <p class="item-resultado">
-                        <span class="etiqueta">DAC:</span>
-                        <span class="valor-destacado">${dac.toFixed()} kVA</span>
-                    </p>
-                    <p class="item-resultado">
-                        <span class="etiqueta">Consumo Mensual:</span>
-                        <span class="valor-destacado">${totalkWh.toFixed()} kWh/mes</span>
-                    </p>
-                    <p class="item-resultado">
-                        <span class="etiqueta">Consumo Diario:</span>
-                        <span class="valor-destacado">${(totalkWh / diasMes).toFixed(2)} kWh/dia</span>
-                    </p>
-                </div>
-            </div>
+
 
             <!-- Caja 3 - Costos -->
             <div class="caja-resultado">

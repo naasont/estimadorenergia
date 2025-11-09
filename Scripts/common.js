@@ -185,10 +185,34 @@ function saveUsers() {
     localStorage.setItem('appUsers', JSON.stringify(users));
 }
 
+// Función para verificar si el usuario actual es admin
+function isAdmin() {
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) return false;
+    return JSON.parse(currentUser).username === 'admin';
+}
+
 // Event listeners para la configuración
 document.addEventListener('DOMContentLoaded', function() {
     cargarConfiguracion(); // Cargar la configuración al inicio
     loadUsers(); // Cargar usuarios al inicio
+
+    // Manejador para el menú de Artefactos
+    $('#menu-artefactos').on('click', function(e) {
+        e.preventDefault();
+        if (isAdmin()) {
+            // Si es admin, cierra el dropdown y abre el modal
+            $('#user-dropdown-content').removeClass('show');
+            if (window.Artifacts && typeof window.Artifacts.openModal === 'function') {
+                window.Artifacts.openModal();
+            } else {
+                console.error("El módulo de artefactos no está disponible.");
+            }
+        } else {
+            // Si no es admin, muestra un mensaje
+            alert('Acceso restringido. Solo los administradores pueden gestionar artefactos.');
+        }
+    });
 
     const guardarConfigBtn = document.getElementById('guardar-configuracion');
     if (guardarConfigBtn) {
