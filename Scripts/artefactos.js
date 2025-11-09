@@ -97,22 +97,6 @@
             this.syncWithAutocomplete();
         },
 
-        duplicate(id) {
-            const original = artifacts.find(a => a.id === id);
-            if (!original) return null;
-            const newArtifact = {
-                ...original,
-                id: crypto.randomUUID(),
-                APARATOS: `${original.APARATOS} (Copia)`,
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-            };
-            artifacts.push(newArtifact);
-            saveArtifacts();
-            this.syncWithAutocomplete();
-            return newArtifact;
-        },
-
         syncWithAutocomplete() {
             if (window.refreshAutocompleteFromArtifacts) {
                 const autocompleteData = artifacts.map(a => ({
@@ -163,7 +147,6 @@
                     <td>${a.VOLTAJE}</td>
                     <td>
                         <button class="btn-edit">Editar</button>
-                        <button class="btn-duplicate">Duplicar</button>
                         <button class="btn-delete">Eliminar</button>
                     </td>
                 </tr>
@@ -272,14 +255,6 @@
                 $('#btn-guardar-artefacto').text('Actualizar');
                 handlePhaseChange(); // Asegura que el voltaje sea correcto al editar
                 $('#txtAparatos').focus();
-            }
-        });
-
-        $('#tabla-artefactos').on('click', '.btn-duplicate', function() {
-            const id = $(this).closest('tr').data('id');
-            if (confirm('¿Seguro que quieres duplicar este artefacto?')) {
-                ArtifactsAPI.duplicate(id);
-                renderTable();
             }
         });
 

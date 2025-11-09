@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Ocultar el botón limpiar al cambiar de subpestaña
+            // Limpiar y ocultar resultados al cambiar de pestaña
             botonLimpiarFacturas.style.display = 'none';
             // Limpiar resultados al cambiar de pestaña
             resultadoFacturas.innerHTML = '';

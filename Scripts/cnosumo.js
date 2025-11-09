@@ -126,7 +126,43 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('boton-limpiar').addEventListener('click', limpiarTodo);
     // El evento 'change' en 'dias-mes' ya no es necesario aquí, se gestiona desde la configuración
     document.getElementById('boton-calcular').addEventListener('click', calcularConsumo);
+
+    // Verificar si hay un archivo almacenado en localStorage al cargar la página
+    const archivoGuardado = localStorage.getItem('archivoExcel');
+    if (archivoGuardado) {
+        const datos = new Uint8Array(JSON.parse(archivoGuardado));
+        procesarArchivo(datos);
+    }
 });
+
+// Función para procesar archivo Excel
+function manejarArchivo(evento) {
+    const archivo = evento.target.files[0];
+    const lector = new FileReader();
+
+    lector.onload = function(e) {
+        // Convertir archivo a datos procesables
+        const datos = new Uint8Array(e.target.result);
+
+        // Guardar el archivo en localStorage
+        localStorage.setItem('archivoExcel', JSON.stringify(Array.from(datos)));
+
+        // Procesar el archivo
+        procesarArchivo(datos);
+
+        // Notificar al usuario que el archivo ha sido actualizado
+        // Reemplazando alert con un mensaje en la UI si es posible, o simplemente un console.log
+        const mensajeConfiguracion = document.getElementById('mensaje-configuracion');
+        if (mensajeConfiguracion) {
+            mensajeConfiguracion.textContent = 'Archivo de dispositivos cargado y almacenado.';
+            mensajeConfiguracion.style.color = 'green';
+            setTimeout(() => mensajeConfiguracion.textContent = '', 3000);
+        } else {
+            console.log('El archivo ha sido actualizado y almacenado en la memoria.');
+        }
+    };
+    lector.readAsArrayBuffer(archivo);
+}
 
 // Función para procesar el archivo Excel
 function procesarArchivo(datos) {
@@ -359,6 +395,28 @@ function calcularConsumo() {
                 </div>
             </div>
 
+            <!-- Caja 2 - Parámetros Técnicos -->
+            <div class="caja-resultado">
+                <h4 class="titulo-caja">Parámetros Técnicos</h4>
+                <div class="consumo-detalle">
+                    <p class="item-resultado">
+                        <span class="etiqueta">CTC:</span>
+                        <span class="valor">${datosPDF.ctc.toFixed(2)} kVA</span>
+                    </p>
+                    <p class="item-resultado">
+                        <span class="etiqueta">DAC:</span>
+                        <span class="valor">${datosPDF.dac.toFixed(2)} kVA</span>
+                    </p>
+                    <p class="item-resultado">
+                        <span class="etiqueta">Consumo Mensual:</span>
+                        <span class="valor-destacado">${datosPDF.consumoMensual.toFixed(2)} kWh/mes</span>
+                    </p>
+                    <p class="item-resultado">
+                        <span class="etiqueta">Consumo Diario:</span>
+                        <span class="valor-destacado">${datosPDF.consumoDiario.toFixed(2)} kWh/día</span>
+                    </p>
+                </div>
+            </div>
 
 
             <!-- Caja 3 - Costos -->

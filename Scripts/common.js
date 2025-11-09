@@ -1,13 +1,16 @@
-// Objeto global para almacenar la configuración
-let appConfig = {
-    diasMes: 30,
-    costoKva: 1.30,
-    ivaPorcentaje: 16,
-    valorDolar: 65,
-    costoKwh: 0.01
+// Objeto global para encapsular el estado y la lógica de la aplicación
+const App = {
+    config: {
+        diasMes: 30,
+        costoKva: 1.30,
+        ivaPorcentaje: 16,
+        valorDolar: 65,
+        costoKwh: 0.01,
+        horasMes: 300 // Usado por 'Cálculo por Corrientes'
+    },
+    users: [], // Almacena todos los usuarios
+    currentUser: null // Almacena el usuario logueado
 };
-// Añadimos horasMensuales como configuración global (usado por 'Cálculo por Corrientes')
-appConfig.horasMes = 300;
 
 // Array global para almacenar los usuarios
 // ¡ADVERTENCIA DE SEGURIDAD! Almacenar usuarios y contraseñas en localStorage no es seguro para producción.
@@ -141,24 +144,6 @@ function guardarConfiguracion() {
     setTimeout(() => mensaje.textContent = '', 3000); // Borra el mensaje después de 3 segundos
 }
 
-function restablecerConfiguracion() {
-    // Restablecer a los valores por defecto
-    appConfig = {
-        horasMes: 300,
-        diasMes: 30,
-        costoKva: 1.30,
-        ivaPorcentaje: 16,
-        valorDolar: 65,
-        costoKwh: 0.01
-    };
-    localStorage.removeItem('appConfig'); // Eliminar de localStorage
-    cargarConfiguracion(); // Cargar los valores por defecto en el formulario
-    const mensaje = document.getElementById('mensaje-configuracion');
-    mensaje.textContent = 'Configuración restablecida.';
-    mensaje.style.color = 'orange';
-    setTimeout(() => mensaje.textContent = '', 3000);
-}
-
 // Funciones para cargar y guardar usuarios
 function loadUsers() {
     const savedUsers = localStorage.getItem('appUsers');
@@ -217,11 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const guardarConfigBtn = document.getElementById('guardar-configuracion');
     if (guardarConfigBtn) {
         guardarConfigBtn.addEventListener('click', guardarConfiguracion);
-    }
-
-    const limpiarConfigBtn = document.getElementById('limpiar-configuracion');
-    if (limpiarConfigBtn) {
-        limpiarConfigBtn.addEventListener('click', restablecerConfiguracion);
     }
 
     // Establecer la fecha actual en el campo de fecha actual (en la pestaña de facturas)
